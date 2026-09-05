@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# 构建产物
+release/
+dist/
+dist_new/
+out/
+
+# 其他
+.DS_Store
+Thumbs.db
+*.log
+cache/
+data_cache/
+
+# IDE
+.idea/
+
+# 迁移标记
+D
+
+# 敏感信息（永不入库）
+*账号*
+*密码*
+*.env
+*.key
+
+# 邮箱账号文件
+*Hotmail*
+邮箱*

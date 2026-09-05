@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>📢 文本转语音</h1>
+            <div class="header-actions">
+                <button id="open-file-btn" class="btn btn-secondary">📁 打开文件</button>
+                <button id="manage-voices-btn" class="btn btn-secondary">🎤 音源管理</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="voice-select">选择语音</label>
+                    <select id="voice-select">
+                        <option value="">加载中...</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="rate-slider">语速: <span id="rate-value">1.0</span></label>
+                    <input type="range" id="rate-slider" min="0.5" max="2" step="0.1" value="1">
+                </div>
+
+                <div class="control-group">
+                    <label for="pitch-slider">音调: <span id="pitch-value">1.0</span></label>
+                    <input type="range" id="pitch-slider" min="0" max="2" step="0.1" value="1">
+                </div>
+
+                <div class="control-group">
+                    <label for="volume-slider">音量: <span id="volume-value">1.0</span></label>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1">
+                </div>
+
+                <div class="button-group">
+                    <button id="play-btn" class="btn btn-primary">▶ 播放</button>
+                    <button id="pause-btn" class="btn btn-warning" disabled>⏸ 暂停</button>
+                    <button id="stop-btn" class="btn btn-danger" disabled>⏹ 停止</button>
+                </div>
+
+                <div class="button-group">
+                    <button id="save-audio-btn" class="btn btn-success">💾 保存音频</button>
+                </div>
+
+                <div class="status-bar">
+                    <span id="status-text">就绪</span>
+                </div>
+            </div>
+
+            <div class="text-panel">
+                <textarea id="text-input" placeholder="请输入要转换为语音的文本..."></textarea>
+            </div>
+        </div>
+
+        <div id="voice-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🎤 音源管理</h2>
+                    <button id="close-modal-btn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="voice-section">
+                        <h3>添加自定义音源</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="custom-voice-name">音源名称</label>
+                                <input type="text" id="custom-voice-name" placeholder="输入音源名称">
+                            </div>
+                            <div class="form-group">
+                                <label for="custom-voice-shortname">Edge TTS ShortName</label>
+                                <input type="text" id="custom-voice-shortname" placeholder="如: zh-CN-XiaoxiaoNeural">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="custom-voice-lang">语言</label>
+                                <select id="custom-voice-lang">
+                                    <option value="zh-CN">中文(普通话)</option>
+                                    <option value="zh-HK">中文(粤语)</option>
+                                    <option value="zh-TW">中文(台湾)</option>
+                                    <option value="en-US">英文(美国)</option>
+                                    <option value="en-GB">英文(英国)</option>
+                                    <option value="ja-JP">日语</option>
+                                    <option value="ko-KR">韩语</option>
+                                    <option value="other">其他</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="add-voice-btn" class="btn btn-primary">添加音源</button>
+                    </div>
+
+                    <div class="voice-section">
+                        <h3>自定义音源列表</h3>
+                        <div id="custom-voices-list">
+                            <p class="empty-message">暂无自定义音源</p>
+                        </div>
+                    </div>
+
+                    <div class="voice-section">
+                        <h3>Edge TTS 可用音源</h3>
+                        <div id="edge-voices-list">
+                            <p class="empty-message">加载中...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

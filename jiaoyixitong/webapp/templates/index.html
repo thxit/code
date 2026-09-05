@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A股短线量化交易系统</title>
+<link rel="stylesheet" href="/static/css/dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="container" id="app">
+
+<div class="header">
+  <div class="header-left">
+    <span class="header-title">A股短线量化交易系统</span>
+    <span class="header-time" id="header-time">--</span>
+  </div>
+  <div class="header-status status-idle" id="header-status">
+    <span class="status-dot dot-idle"></span>
+    <span id="status-text">就绪</span>
+  </div>
+  <div class="header-actions">
+    <select id="strategy-select" class="select-input" onchange="refreshStocks()">
+      <option value="breakout">突破策略</option>
+      <option value="momentum">动量策略</option>
+      <option value="volume_breakout">量能突破</option>
+      <option value="oversold_reversal">超跌反转</option>
+    </select>
+    <button class="btn" onclick="runAnalysisWithStrategy('quick')">⚡ 快速分析</button>
+    <button class="btn btn-primary" onclick="runAnalysisWithStrategy('full')">📊 全面分析</button>
+    <button class="btn" onclick="refreshStocks()">🔄 刷新股票</button>
+  </div>
+</div>
+
+<div class="grid grid-4" id="top-cards">
+  <div class="card stat-card signal-card" id="signal-card">
+    <div class="card-title text-center">交易信号</div>
+    <div class="stat-value value-neutral" id="signal-action">--</div>
+    <div class="stat-sub" id="signal-strength">等待分析</div>
+  </div>
+  <div class="card stat-card">
+    <div class="card-title text-center">综合评分</div>
+    <div class="gauge-container">
+      <div class="gauge-value" id="signal-score">--</div>
+      <div class="scoring-bar"><div class="scoring-indicator" id="score-indicator" style="left:50%"></div></div>
+      <div class="gauge-label">0-100</div>
+    </div>
+  </div>
+  <div class="card stat-card">
+    <div class="card-title text-center">建议仓位</div>
+    <div class="stat-value" id="position-advice">--</div>
+    <div class="stat-sub" id="position-detail">--</div>
+  </div>
+  <div class="card stat-card">
+    <div class="card-title text-center">风险评估</div>
+    <div class="stat-value" id="risk-level">--</div>
+    <div class="stat-sub" id="risk-detail">--</div>
+  </div>
+</div>
+
+<div class="grid grid-2 mt-12" id="reasons-row" style="display:none">
+  <div class="card">
+    <div class="card-header"><span class="card-title">✅ 看多理由</span></div>
+    <ul class="reason-list" id="reasons-pro"></ul>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">⚠️ 风险提示</span></div>
+    <ul class="reason-list" id="reasons-con"></ul>
+  </div>
+</div>
+
+<div class="grid grid-3 mt-12">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">📈 大盘趋势分析</span>
+      <span class="badge badge-blue" id="trend-signal">--</span>
+    </div>
+    <div class="chart-wrapper" style="height:300px"><canvas id="chart-price"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">📊 MACD 指标</span></div>
+    <div class="chart-wrapper" style="height:300px"><canvas id="chart-macd"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">📉 RSI / KDJ 指标</span></div>
+    <div class="chart-wrapper" style="height:300px"><canvas id="chart-rsi"></canvas></div>
+  </div>
+</div>
+
+<div class="grid grid-2 mt-12">
+  <div class="card">
+    <div class="card-header"><span class="card-title">🎯 布林带指标</span></div>
+    <div class="chart-wrapper" style="height:260px"><canvas id="chart-boll"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">📊 成交量分析</span></div>
+    <div class="chart-wrapper" style="height:260px"><canvas id="chart-volume"></canvas></div>
+  </div>
+</div>
+
+<div class="grid grid-2 mt-12">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🔍 技术指标详情</span>
+      <span class="badge badge-blue" id="tech-summary">--</span>
+    </div>
+    <div class="grid grid-2">
+      <div id="indicator-left"></div>
+      <div id="indicator-right"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">🏭 板块轮动 & 情绪</span></div>
+    <div class="tab-bar">
+      <button class="tab-item active" onclick="switchTab('sector')">板块轮动</button>
+      <button class="tab-item" onclick="switchTab('sentiment')">情绪热度</button>
+      <button class="tab-item" onclick="switchTab('flow')">资金流向</button>
+    </div>
+    <div id="tab-sector" class="tab-content">
+      <div class="chart-wrapper" style="height:260px"><canvas id="chart-sector"></canvas></div>
+    </div>
+    <div id="tab-sentiment" class="tab-content" style="display:none">
+      <div id="sentiment-detail"></div>
+    </div>
+    <div id="tab-flow" class="tab-content" style="display:none">
+      <div id="flow-detail"></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2 mt-12 bottom-section">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">⭐ 推荐股票</span>
+      <span class="text-sm text-muted" id="stock-count">--</span>
+    </div>
+    <div style="max-height:360px;overflow-y:auto">
+      <table class="data-table" id="stock-table">
+        <thead><tr><th class="rank">#</th><th>代码</th><th class="name">名称</th><th class="num">价格</th><th class="num">涨跌%</th><th class="num">量比</th><th class="num">评分</th></tr></thead>
+        <tbody id="stock-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">📋 策略回测</span>
+      <span class="badge badge-green" id="bt-return">--</span>
+    </div>
+    <div class="grid grid-2" id="backtest-stats">
+      <div class="text-center"><div class="stat-value" id="bt-total">--</div><div class="text-sm text-muted">总收益率</div></div>
+      <div class="text-center"><div class="stat-value" id="bt-annual">--</div><div class="text-sm text-muted">年化收益</div></div>
+      <div class="text-center"><div class="stat-value" id="bt-sharpe">--</div><div class="text-sm text-muted">夏普比率</div></div>
+      <div class="text-center"><div class="stat-value value-down" id="bt-dd">--</div><div class="text-sm text-muted">最大回撤</div></div>
+      <div class="text-center"><div class="stat-value" id="bt-wr">--</div><div class="text-sm text-muted">胜率</div></div>
+      <div class="text-center"><div class="stat-value" id="bt-trades">--</div><div class="text-sm text-muted">交易次数</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loading-overlay" style="display:none">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loading-text">正在分析中...</div>
+</div>
+
+</div>
+
+<script src="/static/js/dashboard.js"></script>
+</body>
+</html>
